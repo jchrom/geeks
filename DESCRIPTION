@@ -2,11 +2,10 @@ Package: geeks
 Title: Geek API Client
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Jakub",
+           family = "Chromec",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+           email = "chromec.jakub@gmail.com")
 Description: The purpose of this package is to easily retrieve data
     from BoardGameGeek, RPGGeek and VideoGameGeek databases using API v2.
 License: MIT + file LICENSE
