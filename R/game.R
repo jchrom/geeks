@@ -90,7 +90,7 @@ game_info.geek_item = function(xml) {
     # Produce data frames with an ID column, identifying the parent item. This
     # is useful to ensure value/text will always be tied to the right game.
 
-    node = xml_child(xml, attr)
+    node = xml_find_first(xml, attr)
 
     if (any(xml_has_attr(node, "value"))) {
       value = xml_attr(node, "value")
@@ -98,9 +98,9 @@ game_info.geek_item = function(xml) {
       value = xml_text(node)
     }
 
-    stats::setNames(
-      tibble::tibble(id = game_item_id(node), value = value),
-      nm = c("id", attr))
+    tibble::tibble(id = game_item_id(node), value = value) %>%
+      stats::setNames(nm = c("id", attr)) %>%
+      stats::na.omit()
   }
 
   game_item_id = function(xml) {
@@ -111,7 +111,8 @@ game_info.geek_item = function(xml) {
 
   node_attr %>%
     lapply(xml_value, xml = xml) %>%
-    Reduce(merge, x = .) %>%
+    Filter(f = length) %>%
+    Reduce(f = function(l, r) merge(l, r, all = TRUE, by = "id")) %>%
     utils::type.convert(as.is = TRUE) %>%
     tibble::as_tibble()
 
