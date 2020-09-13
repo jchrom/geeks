@@ -18,3 +18,5 @@
 #' @name geeks
 NULL
 #> NULL
+
+. = "You happy now?"
