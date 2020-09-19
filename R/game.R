@@ -1,89 +1,8 @@
-#' Geek Game Data
-#'
-#' A collection of functions to deal with geek items, produced by [get_game()].
-#'
-#' @details
-#'
-#' Most functions in this family parse game data and return tibbles (data
-#' frames). `is_geek_item()` returns TRUE if an object is produced by [get_game()]
-#' and contains game data. `as_xml_nodeset` strips the `"geek_item"` class.
-#'
-#' @param xml A xml nodeset of class `geek_item`.
-#' @param x An object to be tested or converted to an xml nodeset.
-#'
-#' @return A tibble (data frame)
-#'
-#' @name geek_item
-NULL
-
-#' @rdname geek_item
-#' @export
 game_info = function(xml) {
-  UseMethod("game_info")
-}
 
-#' @rdname geek_item
-#' @export
-game_altnames = function(xml) {
-  UseMethod("game_altnames")
-}
-
-#' @rdname geek_item
-#' @export
-game_numplayers = function(xml) {
-  UseMethod("game_numplayers")
-}
-
-#' @rdname geek_item
-#' @export
-game_playerage = function(xml) {
-  UseMethod("game_playerage")
-}
-
-#' @rdname geek_item
-#' @export
-game_language = function(xml) {
-  UseMethod("game_language")
-}
-
-#' @rdname geek_item
-#' @export
-game_stats = function(xml) {
-  UseMethod("game_stats")
-}
-
-#' @rdname geek_item
-#' @export
-game_links = function(xml) {
-  UseMethod("game_links")
-}
-
-#' @rdname geek_item
-#' @export
-as_xml_nodeset = function(x) {
-  UseMethod("as_xml_nodeset")
-}
-
-#' @rdname geek_item
-#' @export
-is_geek_item = function(x) {
-  if (inherits(x, "geek_item")) TRUE else FALSE
-}
-
-#' @export
-game_info.geek_item = function(xml) {
-
-  node_attr = switch(
-    names(attr(xml, "domain")),
-    boardgame = c("name", "yearpublished", "description", "minage",
-                  "minplayers", "maxplayers", "playingtime",
-                  "minplaytime", "maxplaytime", "image"),
-    rpg = c("name", "description", "yearpublished", "seriescode"),
-    videogame = c("name", "description", "minplayers", "maxplayers",
-                  "releasedate"),
-    stop('Domain must be one of "boardgame", "rpg", "videogame"',
-         call. = FALSE)
-  )
+  infos = c("name", "yearpublished", "description", "minage", "minplayers",
+            "maxplayers", "playingtime", "minplaytime", "maxplaytime", "image",
+            "seriescode", "releasedate")
 
   xml_value = function(xml, attr) {
 
@@ -109,7 +28,7 @@ game_info.geek_item = function(xml) {
       xml_attr("id")
   }
 
-  node_attr %>%
+  infos %>%
     lapply(xml_value, xml = xml) %>%
     Filter(f = length) %>%
     Reduce(f = function(l, r) merge(l, r, all = TRUE, by = "id")) %>%
@@ -118,8 +37,7 @@ game_info.geek_item = function(xml) {
 
 }
 
-#' @export
-game_altnames.geek_item = function(xml) {
+game_altnames = function(xml) {
 
   node_name = xml_find_all(xml, "name")
 
@@ -133,16 +51,11 @@ game_altnames.geek_item = function(xml) {
 
 }
 
-#' @export
-game_numplayers.geek_item = function(xml) {
-
-  if (names(attr(xml, "domain")) != "boardgame") {
-    warning('Data on recommended number of players is only available for boardgames',
-            call. = FALSE)
-    return()
-  }
+game_numplayers = function(xml) {
 
   node = xml_find_all(xml, "poll[@name='suggested_numplayers']/results/result")
+
+  if (!length(node)) return()
 
   long = data.frame(
     id = node %>%
@@ -165,16 +78,11 @@ game_numplayers.geek_item = function(xml) {
 
 }
 
-#' @export
-game_playerage.geek_item = function(xml) {
-
-  if (names(attr(xml, "domain")) != "boardgame") {
-    warning("Data on recommended player age is only available for boardgames",
-            call. = FALSE)
-    return()
-  }
+game_playerage = function(xml) {
 
   node = xml_find_all(xml, "poll[@name='suggested_playerage']/results/result")
+
+  if (!length(node)) return()
 
   tibble::tibble(
     id = node %>%
@@ -186,16 +94,11 @@ game_playerage.geek_item = function(xml) {
 
 }
 
-#' @export
-game_language.geek_item = function(xml) {
-
-  if (names(attr(xml, "domain")) != "boardgame") {
-    warning("Language dependency data is only available for boardgames",
-            call. = FALSE)
-    return()
-  }
+game_language = function(xml) {
 
   node = xml_find_all(xml, "poll[@name='language_dependence']/results/result")
+
+  if (!length(node)) return()
 
   tibble::tibble(
     id = node %>%
@@ -207,8 +110,45 @@ game_language.geek_item = function(xml) {
 
 }
 
-#' @export
-game_stats.geek_item = function(xml) {
+game_links = function(xml) {
+
+  links = xml_find_all(xml, "link")
+
+  tibble::tibble(
+    id = links %>%
+      xml_find_first("./parent::item") %>%
+      xml_attr("id"),
+    link_id   = xml_attr(links, "id"),
+    link_type = xml_attr(links, "type"),
+    link_name = xml_attr(links, "value")) %>%
+    utils::type.convert(as.is = TRUE)
+
+}
+
+tidy_game_data = function(xml, wanted = NULL) {
+
+  fn_info = list(
+    info       = game_info,
+    altnames   = game_altnames,
+    numplayers = game_numplayers,
+    playerage  = game_playerage,
+    language   = game_language,
+    links      = game_links)
+
+  fn_additional = list(
+    stats          = game_stats,
+    versions       = game_versions,
+    marketplace    = game_marketplace,
+    videos         = game_videos,
+    comments       = game_comments,
+    ratingcomments = game_ratingcomments
+  )[wanted]
+
+  Filter(length, lapply(c(fn_info, fn_additional), function(f) f(xml)))
+
+}
+
+game_stats = function(xml) {
 
   stats = xml %>%
     xml_find_all("statistics") %>%
@@ -232,23 +172,44 @@ game_stats.geek_item = function(xml) {
 
 }
 
-#' @export
-game_links.geek_item = function(xml) {
+game_comments = function(xml) {
 
-  links = xml_find_all(xml, "link")
+  # The node is identified as 'comments' for both comments and ratingcomments.
+  node = xml_find_all(xml, "comments")
+
+  if (!length(node)) return()
+
+  text = node %>%
+    xml_contents() %>%
+    xml_attr("value")
+
+  text[!nchar(text)] = NA_character_
+
+  rating = node %>%
+    xml_contents() %>%
+    xml_attr("rating")
+
+  rating[rating =="N/A"] = NA_character_
 
   tibble::tibble(
-    id = links %>%
-      xml_find_first("./parent::item") %>%
+    id = node %>%
+      xml_contents() %>%
+      xml_find_first("./../parent::item") %>%
       xml_attr("id"),
-    link_id   = xml_attr(links, "id"),
-    link_type = xml_attr(links, "type"),
-    link_name = xml_attr(links, "value")) %>%
-    utils::type.convert(as.is = TRUE)
+    username = node %>%
+      xml_contents() %>%
+      xml_attr("username"),
+    rating = rating,
+    text = text)
 
 }
 
-#' @export
-as_xml_nodeset.geek_item = function(x) {
-  structure(x, class = "xml_nodeset")
-}
+game_ratingcomments = game_comments
+
+# To be implemented; for now, only XML is returned.
+
+game_versions = identity
+
+game_marketplace = identity
+
+game_videos = identity

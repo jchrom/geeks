@@ -14,6 +14,12 @@
 #' @importFrom xml2 xml_child xml_attr xml_text xml_find_first xml_find_all
 #'   xml_contents xml_length xml_attrs xml_children xml_has_attr
 #'
+#' @importFrom stats setNames na.omit reshape
+#'
+#' @importFrom utils type.convert str
+#'
+#' @importFrom tibble tibble as_tibble add_column
+#'
 #' @docType package
 #' @name geeks
 NULL

@@ -6,27 +6,45 @@
 \usage{
 get_game(
   id,
-  domain = c("boardgame", "rpg", "videogame"),
-  data = c("stats", "versions", "historical", "marketplace", "comments",
-    "ratingcomments", "videos"),
+  additional_data = "stats",
+  output = c("tidy", "xml", "response"),
+  page = 1,
   silent = TRUE
 )
 }
 \arguments{
 \item{id}{A vector of game id numbers.}
 
-\item{domain}{One of \code{"boardgame"}, \code{"rpg"} or \code{"videogame"}. Determines
-which domain the request will go to. Defaults to \code{"boardgame"}.}
+\item{additional_data}{One or multiple of \code{"stats"}, \code{"versions"},
+\code{"marketplace"}, \code{"videos"}, \code{"comments"}, \code{"ratingcomments"}.
 
-\item{data}{What kinds of data to retrieve (besides basic info). See
-\href{https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc3}{API2 documentation}
-for details.}
+\strong{Note.} The API will not return both \code{comments} and \code{ratingcomments}
+in the same call. If you request both, you will only get \code{comments}.}
 
-\item{silent}{Whether to print the URL on request.}
+\item{output}{Decide the amount of processing for the response:
+\itemize{
+\item \code{"tidy"} returns a list of data frames.
+\item \code{"xml"} returns a list of XML documents, as read by \link[xml2:read_xml]{xml2::read_xml}.
+This is useful if you wish to process the XML data in your own way.
+\item \code{"response"} returns an unprocessed \link[httr:response]{httr::response} object for debugging.
+This option prevents paging from happening, so you will only get a single
+page.
+}}
+
+\item{page}{Page number from which to start paging. Defaults to \code{1}.}
+
+\item{silent}{Whether to print the URL on request. Defaults to \code{FALSE}.}
 }
 \value{
-An xml2 nodeset of class "geek_item"
+See the value of \code{output}.
 }
 \description{
-Request game data from one of the geek sites.
+Request data about a game from a geek site.
+}
+\examples{
+
+# You don't really need to name the vector, but it makes things clearer.
+ids = c(gloomhaven = 174430, agricola = 31260, junkart = 193042)
+res = get_game(ids, additional_data = "stats")
+res
 }
