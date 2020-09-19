@@ -129,7 +129,7 @@ get_game = function(id, additional_data = "stats",
 
   }
 
-  tidy = tidy_game_data(page1, wanted = wanted)
+  tidy = tidy_game_data(page1)
 
   pages = pages %>%
     lapply(game_comments) %>%
@@ -187,7 +187,7 @@ print.geek_item = function(x, ...) {
 
   cat("<geek_item>\n ")
 
-  print(str(x, max.level = 1, give.attr = FALSE))
+  str(x, max.level = 1, give.attr = FALSE)
 
   invisible(x)
 

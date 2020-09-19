@@ -1,3 +1,28 @@
+# See geeks.R for imports
+
+tidy_game_data = function(xml) {
+
+  fn_info = list(
+    info       = game_info,
+    altnames   = game_altnames,
+    numplayers = game_numplayers,
+    playerage  = game_playerage,
+    language   = game_language,
+    links      = game_links)
+
+  fn_additional = list(
+    stats       = game_stats,
+    versions    = game_versions,
+    marketplace = game_marketplace,
+    videos      = game_videos,
+    comments    = game_comments)
+
+  Filter(length, lapply(c(fn_info, fn_additional), function(f) f(xml)))
+
+}
+
+# Basic game info --------------------------------------------------------------
+
 game_info = function(xml) {
 
   infos = c("name", "yearpublished", "description", "minage", "minplayers",
@@ -17,9 +42,9 @@ game_info = function(xml) {
       value = xml_text(node)
     }
 
-    tibble::tibble(id = game_item_id(node), value = value) %>%
-      stats::setNames(nm = c("id", attr)) %>%
-      stats::na.omit()
+    tibble(id = game_item_id(node), value = value) %>%
+      setNames(nm = c("id", attr)) %>%
+      na.omit()
   }
 
   game_item_id = function(xml) {
@@ -32,8 +57,8 @@ game_info = function(xml) {
     lapply(xml_value, xml = xml) %>%
     Filter(f = length) %>%
     Reduce(f = function(l, r) merge(l, r, all = TRUE, by = "id")) %>%
-    utils::type.convert(as.is = TRUE) %>%
-    tibble::as_tibble()
+    type.convert(as.is = TRUE) %>%
+    as_tibble()
 
 }
 
@@ -41,13 +66,13 @@ game_altnames = function(xml) {
 
   node_name = xml_find_all(xml, "name")
 
-  tibble::tibble(
+  tibble(
     id = node_name %>%
       xml_find_first("./parent::item") %>%
       xml_attr("id"),
     altname = xml_attr(node_name, "value"),
     type = xml_attr(node_name, "type")) %>%
-    utils::type.convert(as.is = TRUE)
+    type.convert(as.is = TRUE)
 
 }
 
@@ -70,11 +95,11 @@ game_numplayers = function(xml) {
     utils::type.convert(as.is = TRUE)
 
   long %>%
-    stats::reshape(v.names = "votes", idvar = c("id", "numplayers"),
+    reshape(v.names = "votes", idvar = c("id", "numplayers"),
                    timevar = c("name"),
                    direction = "wide") %>%
-    stats::setNames(nm = gsub("^[^\\.]+\\.", "", x = names(.))) %>%
-    tibble::as_tibble()
+    setNames(nm = gsub("^[^\\.]+\\.", "", x = names(.))) %>%
+    as_tibble()
 
 }
 
@@ -84,13 +109,13 @@ game_playerage = function(xml) {
 
   if (!length(node)) return()
 
-  tibble::tibble(
+  tibble(
     id = node %>%
       xml_find_first("../../parent::item") %>%
       xml_attr("id"),
     playerage = xml_attr(node, "value"),
     votes = xml_attr(node, "numvotes")) %>%
-    utils::type.convert(as.is = TRUE)
+    type.convert(as.is = TRUE)
 
 }
 
@@ -100,13 +125,13 @@ game_language = function(xml) {
 
   if (!length(node)) return()
 
-  tibble::tibble(
+  tibble(
     id = node %>%
       xml_find_first("../../parent::item") %>%
       xml_attr("id"),
     langlevel = xml_attr(node, "value"),
     votes = xml_attr(node, "numvotes")) %>%
-    utils::type.convert(as.is = TRUE)
+    type.convert(as.is = TRUE)
 
 }
 
@@ -114,45 +139,26 @@ game_links = function(xml) {
 
   links = xml_find_all(xml, "link")
 
-  tibble::tibble(
+  tibble(
     id = links %>%
       xml_find_first("./parent::item") %>%
       xml_attr("id"),
     link_id   = xml_attr(links, "id"),
     link_type = xml_attr(links, "type"),
     link_name = xml_attr(links, "value")) %>%
-    utils::type.convert(as.is = TRUE)
+    type.convert(as.is = TRUE)
 
 }
 
-tidy_game_data = function(xml, wanted = NULL) {
-
-  fn_info = list(
-    info       = game_info,
-    altnames   = game_altnames,
-    numplayers = game_numplayers,
-    playerage  = game_playerage,
-    language   = game_language,
-    links      = game_links)
-
-  fn_additional = list(
-    stats          = game_stats,
-    versions       = game_versions,
-    marketplace    = game_marketplace,
-    videos         = game_videos,
-    comments       = game_comments,
-    ratingcomments = game_ratingcomments
-  )[wanted]
-
-  Filter(length, lapply(c(fn_info, fn_additional), function(f) f(xml)))
-
-}
+# Additional data --------------------------------------------------------------
 
 game_stats = function(xml) {
 
-  stats = xml %>%
-    xml_find_all("statistics") %>%
-    xml_children()
+  node = xml_find_all(xml, "statistics")
+
+  if (!length(node)) return()
+
+  stats = xml_contents(node)
 
   extract_value = function(xml, what) {
     xml %>%
@@ -164,11 +170,11 @@ game_stats = function(xml) {
                  "median", "owned", "trading", "wanting", "wishing",
                  "numcomments", "numweights", "averageweight")
 
-  stats::setNames(nm = statistics) %>%
+  setNames(nm = statistics) %>%
     lapply(extract_value, xml = stats) %>%
-    tibble::as_tibble() %>%
+    as_tibble() %>%
     tibble::add_column(id = xml_attr(xml, "id"), .before = 1) %>%
-    utils::type.convert(as.is = TRUE)
+    type.convert(as.is = TRUE)
 
 }
 
@@ -191,7 +197,7 @@ game_comments = function(xml) {
 
   rating[rating =="N/A"] = NA_character_
 
-  tibble::tibble(
+  tibble(
     id = node %>%
       xml_contents() %>%
       xml_find_first("./../parent::item") %>%
@@ -204,12 +210,40 @@ game_comments = function(xml) {
 
 }
 
-game_ratingcomments = game_comments
+# Not implemented yet ----------------------------------------------------------
 
-# To be implemented; for now, only XML is returned.
+game_versions = function(xml) {
 
-game_versions = identity
+  node = xml_find_all(xml, "versions")
 
-game_marketplace = identity
+  if (!length(node)) return()
 
-game_videos = identity
+  message("Parsing versions is not implemented yet, returning XML document")
+
+  node
+
+}
+
+game_marketplace = function(xml) {
+
+  node = xml_find_all(xml, "marketplace")
+
+  if (!length(node)) return()
+
+  message("Parsing marketplace is not implemented yet, returning XML document")
+
+  node
+
+}
+
+game_videos = function(xml) {
+
+  node = xml_find_all(xml, "videos")
+
+  if (!length(node)) return()
+
+  message("Parsing videos is not implemented yet, returning XML document")
+
+  node
+
+}
