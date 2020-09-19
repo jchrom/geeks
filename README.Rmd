@@ -37,20 +37,28 @@ At the moment, fetching and parsing most of game data is implemented. Other
 components such as plays, threads and search are to be added later.
 
 The following snippet retrieves data about a set of games, and coerces them
-into a data frame:
+into a list of data frames:
 
 ```{r example}
 library(geeks)
+games = get_game(c("174430", "161936", "224517"), additional_data = "stats")
+games
+```
+Show basic game info:
 
-games = get_game(c("174430", "161936", "224517"), domain = "boardgame")
+```{r}
+games$info
+```
 
-game_info(games)
+Show stats:
 
-game_stats(games)
+```{r}
+games$stats
 ```
 
 ## Built on
 
-Credits mostly to [xml2](https://github.com/r-lib/xml2),
-[httr](https://github.com/r-lib/httr)
-and the BGG [API2 docs](https://boardgamegeek.com/wiki/page/BGG_XML_API2).
+[xml2](https://github.com/r-lib/xml2),
+[httr](https://github.com/r-lib/httr),
+[tibble](https://github.com/tidyverse/tibble) and
+the BGG [API2 docs](https://boardgamegeek.com/wiki/page/BGG_XML_API2).

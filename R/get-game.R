@@ -34,7 +34,8 @@
 #' res = get_game(ids, additional_data = "stats")
 #' res
 
-get_game = function(id, additional_data = "stats",
+get_game = function(id,
+                    additional_data = NULL,
                     output = c("tidy", "xml", "response"),
                     page = 1,
                     silent = TRUE) {
