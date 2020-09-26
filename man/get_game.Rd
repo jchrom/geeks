@@ -6,7 +6,7 @@
 \usage{
 get_game(
   id,
-  additional_data = "stats",
+  additional_data = NULL,
   output = c("tidy", "xml", "response"),
   page = 1,
   silent = TRUE
