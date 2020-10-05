@@ -101,7 +101,7 @@ get_game = function(id,
 
     # If the page length for given game is less than 100 it indicates that there
     # are no more comments to fetch. If it is exactly 100, there may be more
-    # results, so that game's id is returned included in the next request.
+    # results, so that game's id is returned and included in the next request.
 
     next_ids = has_full_page(xml)
 

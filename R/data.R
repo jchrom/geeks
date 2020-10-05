@@ -51,36 +51,35 @@
 #
 #' * __id__ int, a unique game id.
 #' * __numplayers__ chr, number of players, can be `4+` and similar string values.
-#' * __Best__ int, how many times this number of players was voted "Best".
-#' * __Recommended__ int, how many times this number of players was
-#'   voted "Recommended".
-#' * __Not Recommended__ int, how many times this number of players was voted
-#'   "Not Recommended".
+#' * __option__ int, whether this number of players was voted `"Best"`,
+#'   `"Recommended"` or `"Not Recommended"`.
+#' * __votes__ int, how many times was this number of players voted for.
 #'
 #' @section playerage:
 #'
 #' This dataset includes poll results on the most appropriate player age.
 #'
 #' * __id__ int, a unique game id.
-#' * __playerage__ chr, can be mostly numerical but can be `"21 and up"`.
-#' * __votes__ int how many times this age was upvoted.
+#' * __playerage__ chr, mostly numbers but can be `"21 and up"`.
+#' * __votes__ int, how many times this age was upvoted.
 #'
 #' @section language:
 #'
 #' This dataset includes poll results on the degree of language requirements.
 #'
 #' * __id__ int, a unique game id.
-#' * __langlevel__ chr, one of four values ordered from no in-game text to
-#'   unplayable in another language.
+#' * __langlevel__ chr, one of four ordered values ranging from "no in-game text"
+#'   to "unplayable in another language".
 #' * __votes__ int, how many times this level upvoted.
 #'
 #' @section links:
 #'
-#' This dataset includes information on related items, such as mechanics.
+#' A list of data frames. Includes information on related items, such
+#' as mechanics, categories, designers or artists. The actual column names
+#' follow the same pattern but depend on what type of link is included.
 #'
 #' * __id__ int, a unique game id
 #' * __link_id__ int, related item id.
-#' * __link_type__ chr, related item type, such `"mechanic"` or `"category"`.
 #' * __link_name__ chr, related item name.
 #'
 #' @section stats:
@@ -90,18 +89,23 @@
 #' * __id__ int, a unique game id.
 #' * __usersrated__ int, voter count.
 #' * __average__ num, average rating.
-#' * __bayesaverage__ num, a combination of the average rating and thirty
-#'   additional average ratings across the whole site. This is intended
-#'   to prevent a new or rare game with only a few high ratings from taking
-#'   the top spots. See
-#'   [BGG forum.](https://boardgamegeek.com/thread/71129/what-bayesian-average)
+#' * __bayesaverage__ num, see note below.
 #' * __stddev__ num
 #' * __median__ int
-#' * __owned__ int, number of people who sold a game.
-#' * __trading__ int, number of people who seek to sell a game.
-#' * __wanting__ int, number of people who seek to buy a game.
-#' * __wishing__ int
+#' * __owned__ int, how many people currently own this game.
+#' * __trading__ int, how many people want to sell this game.
+#' * __wanting__ int, how many people want to buy this game.
+#' * __wishing__ int, how many people have this game on their wishlist.
 #' * __numcomments__ int
 #' * __numweights__ int
 #' * __averageweight__ num, a measure of game complexity.
+#'
+#' __bayeaverage.__ Games with less than 30 ratings do not have `bayesaverage`,
+#' so the value is `NA`. For games with at least 30 ratings, an average rating
+#' across the whole database is taken, then repeated a number of times (starting
+#' at 500 but can be more) and added to the actual ratings. This is to prevent
+#' games with very few ratings to reach extremely low or high averages. See
+#' [this BGG thread.](https://boardgamegeek.com/thread/71129/what-bayesian-average)
+#' for discussion.
+#'
 "bgg"

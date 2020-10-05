@@ -82,24 +82,15 @@ game_numplayers = function(xml) {
 
   if (!length(node)) return()
 
-  long = data.frame(
-    id = node %>%
-      xml_find_first("../../parent::item") %>%
-      xml_attr("id"),
-    numplayers = node %>%
-      xml_find_first("./parent::results") %>%
-      xml_attr("numplayers"),
-    name = xml_attr(node, "value"),
-    votes = xml_attr(node, "numvotes"),
-    stringsAsFactors = FALSE) %>%
-    utils::type.convert(as.is = TRUE)
-
-  long %>%
-    reshape(v.names = "votes", idvar = c("id", "numplayers"),
-                   timevar = c("name"),
-                   direction = "wide") %>%
-    setNames(nm = gsub("^[^\\.]+\\.", "", x = names(.))) %>%
-    as_tibble()
+  tibble(id = node %>%
+           xml_find_first("../../parent::item") %>%
+           xml_attr("id"),
+         numplayers = node %>%
+           xml_find_first("./parent::results") %>%
+           xml_attr("numplayers"),
+         option = xml_attr(node, "value"),
+         votes = xml_attr(node, "numvotes")) %>%
+    type.convert(as.is = TRUE)
 
 }
 
@@ -125,11 +116,19 @@ game_language = function(xml) {
 
   if (!length(node)) return()
 
+  lang = c(
+    "No necessary in-game text" = "none",
+    "Some necessary text - easily memorized or small crib sheet" = "some",
+    "Moderate in-game text - needs crib sheet or paste ups" = "moderate",
+    "Extensive use of text - massive conversion needed to be playable" =
+      "extensive",
+    "Unplayable in another language" = "essential")
+
   tibble(
     id = node %>%
       xml_find_first("../../parent::item") %>%
       xml_attr("id"),
-    langlevel = xml_attr(node, "value"),
+    langlevel = lang[xml_attr(node, "value")],
     votes = xml_attr(node, "numvotes")) %>%
     type.convert(as.is = TRUE)
 
@@ -139,7 +138,7 @@ game_links = function(xml) {
 
   links = xml_find_all(xml, "link")
 
-  tibble(
+  out = tibble(
     id = links %>%
       xml_find_first("./parent::item") %>%
       xml_attr("id"),
@@ -147,6 +146,19 @@ game_links = function(xml) {
     link_type = xml_attr(links, "type"),
     link_name = xml_attr(links, "value")) %>%
     type.convert(as.is = TRUE)
+
+  # The prefix "boardgame" is added regardless of what the game is actually
+  # classified as (boardgame vs RPG vs videogame). Because it carries no
+  # information, it is removed.
+
+  out$link_type = gsub("^boardgame", "", out$link_type)
+
+  out %>%
+    split(.$link_type) %>%
+    lapply(function(df) {
+      x = df[, c("id", "link_id", "link_name")]
+      setNames(x, nm = gsub("^link", df$link_type[1], names(x)))
+    })
 
 }
 
@@ -170,11 +182,30 @@ game_stats = function(xml) {
                  "median", "owned", "trading", "wanting", "wishing",
                  "numcomments", "numweights", "averageweight")
 
-  setNames(nm = statistics) %>%
+  out = setNames(nm = statistics) %>%
     lapply(extract_value, xml = stats) %>%
     as_tibble() %>%
     tibble::add_column(id = xml_attr(xml, "id"), .before = 1) %>%
     type.convert(as.is = TRUE)
+
+  # The value of `median` returned by the API seems to always be "0" (as of
+  # 2020-10-03) so it can be dropped altogether. Looks like a bug.
+
+  out$median = NULL
+
+  # When there are no ratings, the `average`, `averageweight` and `stddev`
+  # should be considered missing (even if the API returns "0").
+
+  out$average[out$usersrated == 0] = NA_integer_
+  out$stddev[out$usersrated == 0] = NA_integer_
+  out$averageweight[out$numweights == 0] = NA_integer_
+
+  # When there are less than 30 ratings, `bayesaverage` is not calculated
+  # and should be considered missing (even if the API returns "0").
+
+  out$bayesaverage[out$usersrated < 30] = NA_integer_
+
+  out
 
 }
 

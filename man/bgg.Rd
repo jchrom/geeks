@@ -53,11 +53,9 @@ This dataset includes poll results on the best number of players for a game.
 \itemize{
 \item \strong{id} int, a unique game id.
 \item \strong{numplayers} chr, number of players, can be \verb{4+} and similar string values.
-\item \strong{Best} int, how many times this number of players was voted "Best".
-\item \strong{Recommended} int, how many times this number of players was
-voted "Recommended".
-\item \strong{Not Recommended} int, how many times this number of players was voted
-"Not Recommended".
+\item \strong{option} int, whether this number of players was voted \code{"Best"},
+\code{"Recommended"} or \code{"Not Recommended"}.
+\item \strong{votes} int, how many times was this number of players voted for.
 }
 }
 
@@ -67,8 +65,8 @@ voted "Recommended".
 This dataset includes poll results on the most appropriate player age.
 \itemize{
 \item \strong{id} int, a unique game id.
-\item \strong{playerage} chr, can be mostly numerical but can be \code{"21 and up"}.
-\item \strong{votes} int how many times this age was upvoted.
+\item \strong{playerage} chr, mostly numbers but can be \code{"21 and up"}.
+\item \strong{votes} int, how many times this age was upvoted.
 }
 }
 
@@ -78,8 +76,8 @@ This dataset includes poll results on the most appropriate player age.
 This dataset includes poll results on the degree of language requirements.
 \itemize{
 \item \strong{id} int, a unique game id.
-\item \strong{langlevel} chr, one of four values ordered from no in-game text to
-unplayable in another language.
+\item \strong{langlevel} chr, one of four ordered values ranging from "no in-game text"
+to "unplayable in another language".
 \item \strong{votes} int, how many times this level upvoted.
 }
 }
@@ -87,11 +85,12 @@ unplayable in another language.
 \section{links}{
 
 
-This dataset includes information on related items, such as mechanics.
+A list of data frames. Includes information on related items, such
+as mechanics, categories, designers or artists. The actual column names
+follow the same pattern but depend on what type of link is included.
 \itemize{
 \item \strong{id} int, a unique game id
 \item \strong{link_id} int, related item id.
-\item \strong{link_type} chr, related item type, such \code{"mechanic"} or \code{"category"}.
 \item \strong{link_name} chr, related item name.
 }
 }
@@ -104,21 +103,25 @@ This dataset includes game statistics.
 \item \strong{id} int, a unique game id.
 \item \strong{usersrated} int, voter count.
 \item \strong{average} num, average rating.
-\item \strong{bayesaverage} num, a combination of the average rating and thirty
-additional average ratings across the whole site. This is intended
-to prevent a new or rare game with only a few high ratings from taking
-the top spots. See
-\href{https://boardgamegeek.com/thread/71129/what-bayesian-average}{BGG forum.}
+\item \strong{bayesaverage} num, see note below.
 \item \strong{stddev} num
 \item \strong{median} int
-\item \strong{owned} int, number of people who sold a game.
-\item \strong{trading} int, number of people who seek to sell a game.
-\item \strong{wanting} int, number of people who seek to buy a game.
-\item \strong{wishing} int
+\item \strong{owned} int, how many people currently own this game.
+\item \strong{trading} int, how many people want to sell this game.
+\item \strong{wanting} int, how many people want to buy this game.
+\item \strong{wishing} int, how many people have this game on their wishlist.
 \item \strong{numcomments} int
 \item \strong{numweights} int
 \item \strong{averageweight} num, a measure of game complexity.
 }
+
+\strong{bayeaverage.} Games with less than 30 ratings do not have \code{bayesaverage},
+so the value is \code{NA}. For games with at least 30 ratings, an average rating
+across the whole database is taken, then repeated a number of times (starting
+at 500 but can be more) and added to the actual ratings. This is to prevent
+games with very few ratings to reach extremely low or high averages. See
+\href{https://boardgamegeek.com/thread/71129/what-bayesian-average}{this BGG thread.}
+for discussion.
 }
 
 \keyword{datasets}
