@@ -2,22 +2,20 @@
 
 tidy_game_data = function(xml) {
 
-  fn_info = list(
-    info       = game_info,
-    altnames   = game_altnames,
-    numplayers = game_numplayers,
-    playerage  = game_playerage,
-    language   = game_language,
-    links      = game_links)
-
-  fn_additional = list(
+  fn = list(
+    info        = game_info,
+    altnames    = game_altnames,
+    numplayers  = game_numplayers,
+    playerage   = game_playerage,
+    language    = game_language,
+    links       = game_links,
     stats       = game_stats,
     versions    = game_versions,
     marketplace = game_marketplace,
     videos      = game_videos,
     comments    = game_comments)
 
-  Filter(length, lapply(c(fn_info, fn_additional), function(f) f(xml)))
+  Filter(length, lapply(fn, function(f) f(xml)))
 
 }
 
