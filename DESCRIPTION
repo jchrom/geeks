@@ -17,6 +17,7 @@ Imports:
     xml2,
     magrittr,
     httr,
+    curl,
     tibble
 Depends: 
     R (>= 2.10)

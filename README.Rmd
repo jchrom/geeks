@@ -23,6 +23,9 @@ The purpose of **geeks** is to download data from three game-related geek
 sites: [boardgamegeek](https://www.boardgamegeek.com),
 [rpggeek](https://rpggeek.com) and [videogamegeek](https://videogamegeek.com).
 
+At the moment, the usage covers fetching and parsing game entries, plays
+and families. Support for collections, search and threads is planned.
+
 ## Installation
 
 You can install the development version from [GitHub](https://github.com/) with:
@@ -31,29 +34,27 @@ You can install the development version from [GitHub](https://github.com/) with:
 # install.packages("devtools")
 devtools::install_github("jchrom/geeks")
 ```
+
 ## Example
 
-At the moment, fetching and parsing most of game data is implemented. Other
-components such as plays, threads and search are to be added later.
-
 The following snippet retrieves data about a set of games, and coerces them
-into a list of data frames:
+into a data frame:
 
-```{r example}
+```{r}
 library(geeks)
-games = get_game(c("174430", "161936", "224517"), additional_data = "stats")
-games
-```
-Show basic game info:
-
-```{r}
-games$info
+get_games(c(174430, 161936, 224517))
 ```
 
-Show stats:
+Play data can be obtained given a game id:
 
 ```{r}
-games$stats
+get_plays(174430)
+```
+
+Multiple families can be obtained at once:
+
+```{r}
+get_families(c(7544, 17634))
 ```
 
 ## Built on

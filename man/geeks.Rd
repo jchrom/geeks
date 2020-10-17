@@ -5,14 +5,10 @@
 \alias{geeks}
 \title{geeks: Geek API client}
 \description{
-The purpose of \code{geeks} is to fetch data from three famous geek websites
-using \href{https://boardgamegeek.com/wiki/page/BGG_XML_API2}{API2}.
-}
-\details{
-Geek websites:
-\itemize{
-\item https://www.boardgamegeek.com
-\item https://rpggeek.com
-\item https://videogamegeek.com
-}
+The purpose of \code{geeks} is to fetch tidy data from
+\href{https://www.boardgamegeek.com}{boardgamegeek},
+\href{https://rpggeek.com}{rpggeek} and
+\href{https://videogamegeek.com}{videogamegeek}. Under the hood, it is using the
+\href{https://github.com/r-lib/httr}{httr} package to query the
+\href{https://boardgamegeek.com/wiki/page/BGG_XML_API2}{XMLAPI2}.
 }
